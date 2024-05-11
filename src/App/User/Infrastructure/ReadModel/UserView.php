@@ -20,26 +20,10 @@ use Ramsey\Uuid\UuidInterface;
  */
 class UserView implements SerializableReadModel
 {
-    public const TYPE = 'UserView';
+    final public const TYPE = 'UserView';
 
-    private UuidInterface $uuid;
-
-    private Credentials $credentials;
-
-    private DateTime $createdAt;
-
-    private ?DateTime $updatedAt;
-
-    private function __construct(
-        UuidInterface $uuid,
-        Credentials $credentials,
-        DateTime $createdAt,
-        ?DateTime $updatedAt
-    ) {
-        $this->uuid = $uuid;
-        $this->credentials = $credentials;
-        $this->createdAt = $createdAt;
-        $this->updatedAt = $updatedAt;
+    private function __construct(private readonly UuidInterface $uuid, private readonly Credentials $credentials, public DateTime $createdAt, public ?\App\Shared\Domain\ValueObject\DateTime $updatedAt)
+    {
     }
 
     /**
@@ -54,8 +38,6 @@ class UserView implements SerializableReadModel
     /**
      * @throws DateTimeException
      * @throws AssertionFailedException
-     *
-     * @return UserView
      */
     public static function deserialize(array $data): self
     {

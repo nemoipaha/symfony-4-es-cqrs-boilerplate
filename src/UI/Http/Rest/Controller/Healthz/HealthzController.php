@@ -13,24 +13,11 @@ use Symfony\Component\Routing\Annotation\Route;
 
 final class HealthzController
 {
-    private ElasticSearchEventRepository $elasticSearchEventRepository;
-
-    private MysqlReadModelUserRepository $mysqlReadModelUserRepository;
-
-    public function __construct(
-        ElasticSearchEventRepository $elasticSearchEventRepository,
-        MysqlReadModelUserRepository $mysqlReadModelUserRepository)
+    public function __construct(private readonly ElasticSearchEventRepository $elasticSearchEventRepository, private readonly MysqlReadModelUserRepository $mysqlReadModelUserRepository)
     {
-        $this->elasticSearchEventRepository = $elasticSearchEventRepository;
-        $this->mysqlReadModelUserRepository = $mysqlReadModelUserRepository;
     }
 
     /**
-     * @Route(
-     *     "/healthz",
-     *     name="healthz",
-     *     methods={"GET"}
-     * )
      * @OA\Response(
      *     response=200,
      *     description="OK"
@@ -39,9 +26,9 @@ final class HealthzController
      *     response=500,
      *     description="Something not ok"
      * )
-     *
      * @OA\Tag(name="Healthz")
      */
+    #[Route(path: '/healthz', name: 'healthz', methods: ['GET'])]
     public function __invoke(Request $request): OpenApi
     {
         $elastic = null;

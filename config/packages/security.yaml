@@ -1,6 +1,4 @@
 security:
-    enable_authenticator_manager: true
-
     password_hashers:
         hasher:
             id: App\User\Infrastructure\Auth\PasswordHasher
@@ -34,9 +32,7 @@ security:
             pattern:  ^/api
             provider: users
             stateless: true
-            guard:
-              authenticators:
-                - lexik_jwt_authentication.jwt_token_authenticator
+            jwt: ~
 
         secured_area:
             pattern: ^/
@@ -53,9 +49,9 @@ security:
 
     access_control:
         - { path: ^/profile,      roles: ROLE_USER }
-        - { path: ^/api/healthz, roles: IS_AUTHENTICATED_ANONYMOUSLY }
-        - { path: ^/api/auth,    roles: IS_AUTHENTICATED_ANONYMOUSLY }
-        - { path: ^/api/signup,  roles: IS_AUTHENTICATED_ANONYMOUSLY }
-        - { path: ^/api/doc,     roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/api/healthz, roles: PUBLIC_ACCESS }
+        - { path: ^/api/auth,    roles: PUBLIC_ACCESS }
+        - { path: ^/api/signup,  roles: PUBLIC_ACCESS }
+        - { path: ^/api/doc,     roles: PUBLIC_ACCESS }
         - { path: ^/api/,        roles: IS_AUTHENTICATED_FULLY }
-        - { path: ^/,            roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/,            roles: PUBLIC_ACCESS }

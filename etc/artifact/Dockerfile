@@ -1,19 +1,19 @@
-ARG PHP_VERSION=8.0.13
+ARG PHP_VERSION=8.2.11
 
 
 FROM jorge07/alpine-php:${PHP_VERSION} as php-base
 # List your dependencies here
-ARG PHP_MODULES="php8-pdo php8-pdo_mysql php8-pecl-amqp php8-tokenizer"
-RUN echo "http://dl-4.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories \
-    && apk add -U --no-cache ${PHP_MODULES}
+ARG PHP_MODULES="php82-pdo php82-pdo_mysql php82-mysqlnd php82-pecl-amqp php82-tokenizer php82-posix php82-simplexml php82-xmlwriter"
+RUN apk add -U --no-cache ${PHP_MODULES}
 
 FROM jorge07/alpine-php:${PHP_VERSION}-dev as php-dev
-# Install your project DEVELOPMENT dependencies here
-ARG PHP_MODULES="php8-pdo php8-pdo_mysql php8-pecl-amqp php8-tokenizer php8-posix php8-simplexml php8-xmlwriter"
-RUN echo "http://dl-4.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories \
-    && apk add -U --no-cache ${PHP_MODULES} 
 
-ENV PHP_INI_DIR /etc/php8
+ARG PHP_MODULES="php82-pdo php82-pdo_mysql php82-mysqlnd php82-pecl-amqp php82-tokenizer php82-posix php82-simplexml php82-xmlwriter"
+ARG PHP_DEV_MODULES=""
+
+RUN apk add -U --no-cache ${PHP_MODULES} ${PHP_DEV_MODULES}
+
+ENV PHP_INI_DIR /etc/php82
 
 RUN apk add -U sqlite \
 	&& version=$(php -r "echo PHP_MAJOR_VERSION.PHP_MINOR_VERSION;") \

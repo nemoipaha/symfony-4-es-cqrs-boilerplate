@@ -17,11 +17,6 @@ use Throwable;
 final class SignUpController extends CommandController
 {
     /**
-     * @Route(
-     *     "/signup",
-     *     name="user_create",
-     *     methods={"POST"}
-     * )
      *
      * @OA\Response(
      *     response=201,
@@ -50,15 +45,16 @@ final class SignUpController extends CommandController
      * @throws AssertionFailedException
      * @throws Throwable
      */
+    #[Route(path: '/signup', name: 'user_create', methods: ['POST'])]
     public function __invoke(Request $request): OpenApi
     {
-        $uuid = $request->get('uuid');
-        $email = $request->get('email');
-        $plainPassword = $request->get('password');
+        $uuid = (string) $request->request->get('uuid');
+        $email = (string) $request->request->get('email');
+        $plainPassword = (string) $request->request->get('password');
 
-        Assertion::notNull($uuid, "Uuid can\'t be null");
-        Assertion::notNull($email, "Email can\'t be null");
-        Assertion::notNull($plainPassword, "Password can\'t be null");
+        Assertion::notEmpty($uuid, "Uuid can\'t be empty");
+        Assertion::notEmpty($email, "Email can\'t be empty");
+        Assertion::notEmpty($plainPassword, "Password can\'t be empty");
 
         $commandRequest = new SignUpCommand($uuid, $email, $plainPassword);
 

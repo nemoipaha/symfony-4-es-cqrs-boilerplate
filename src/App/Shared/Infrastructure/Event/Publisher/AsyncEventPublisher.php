@@ -17,19 +17,16 @@ final class AsyncEventPublisher implements EventSubscriberInterface, EventListen
     /** @var DomainMessage[] */
     private array $messages = [];
 
-    private MessengerAsyncEventBus $bus;
-
-    public function __construct(MessengerAsyncEventBus $bus)
+    public function __construct(private readonly MessengerAsyncEventBus $bus)
     {
-        $this->bus = $bus;
     }
 
-    public function handle(DomainMessage $message): void
+    public function handle(DomainMessage $domainMessage): void
     {
-        $this->messages[] = $message;
+        $this->messages[] = $domainMessage;
     }
 
-    public static function getSubscribedEvents()
+    public static function getSubscribedEvents(): array
     {
         return [
             KernelEvents::TERMINATE => 'publish',

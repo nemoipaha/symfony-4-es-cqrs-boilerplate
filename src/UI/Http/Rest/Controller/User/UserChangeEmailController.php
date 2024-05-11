@@ -21,21 +21,12 @@ use Throwable;
 
 final class UserChangeEmailController extends CommandController
 {
-    private Session $session;
-
-    public function __construct(Session $session, CommandBusInterface $commandBus)
+    public function __construct(private readonly Session $session, CommandBusInterface $commandBus)
     {
         parent::__construct($commandBus);
-
-        $this->session = $session;
     }
 
     /**
-     * @Route(
-     *     "/users/{uuid}/email",
-     *     name="user_change_email",
-     *     methods={"POST"}
-     * )
      *
      * @OA\Response(
      *     response=201,
@@ -64,19 +55,19 @@ final class UserChangeEmailController extends CommandController
      * )
      *
      * @OA\Tag(name="User")
-     *
      * @Security(name="Bearer")
      *
      * @throws AssertionFailedException
      * @throws Throwable
      */
+    #[Route(path: '/users/{uuid}/email', name: 'user_change_email', methods: ['POST'])]
     public function __invoke(string $uuid, Request $request): JsonResponse
     {
         $this->validateUuid($uuid);
 
-        $email = $request->get('email');
+        $email = (string) $request->request->get('email');
 
-        Assertion::notNull($email, "Email can\'t be null");
+        Assertion::notEmpty($email, "Email can\'t be empty");
 
         $command = new ChangeEmailCommand($uuid, $email);
 

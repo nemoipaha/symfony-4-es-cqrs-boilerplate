@@ -19,15 +19,6 @@ use Throwable;
 final class CheckController extends CommandQueryController
 {
     /**
-     * @Route(
-     *     "/auth_check",
-     *     name="auth_check",
-     *     methods={"POST"},
-     *     requirements={
-     *      "_username": "\w+",
-     *      "_password": "\w+"
-     *     }
-     * )
      * @OA\Response(
      *     response=200,
      *     description="Login success",
@@ -60,15 +51,16 @@ final class CheckController extends CommandQueryController
      * @throws InvalidCredentialsException
      * @throws Throwable
      */
+    #[Route(path: '/auth_check', name: 'auth_check', methods: ['POST'], requirements: ['_username' => '\w+', '_password' => '\w+'])]
     public function __invoke(Request $request): OpenApi
     {
-        $username = $request->get('_username');
+        $username = (string) $request->request->get('_username');
 
-        Assertion::notNull($username, 'Username cant\'t be empty');
+        Assertion::notEmpty($username, 'Username cant\'t be empty');
 
         $signInCommand = new SignInCommand(
             $username,
-            $request->get('_password')
+            (string) $request->request->get('_password')
         );
 
         $this->handle($signInCommand);

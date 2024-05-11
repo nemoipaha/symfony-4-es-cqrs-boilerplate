@@ -32,7 +32,7 @@ erase: ## stop and delete containers, clean volumes.
 
 .PHONY: build
 build: ## build environment and initialize composer and project dependencies
-		$(compose) build --parallel
+		$(compose) build --no-cache --parallel
 
 		if [ env = "prod" ]; then \
 			echo Building in $(env) mode; \
@@ -61,15 +61,12 @@ phpunit: db ## execute project unit tests
 
 .PHONY: coverage
 coverage:
-		$(compose) run --rm php sh -lc "wget -q https://github.com/php-coveralls/php-coveralls/releases/download/v2.2.0/php-coveralls.phar; \
-			chmod +x php-coveralls.phar; \
-			export COVERALLS_RUN_LOCALLY=1; \
-			export COVERALLS_EVENT_TYPE='manual'; \
-			export CI_NAME='github-actions'; \
-			php ./php-coveralls.phar -v; \
-		"
+		$(compose) run --rm php sh -lc "git config --global --add safe.directory /app; \
+		composer global require php-coveralls/php-coveralls; \
+		../root/.composer/vendor/bin/php-coveralls --coverage_clover=/app/build/logs/clover.xml -v "
+
 .PHONY: phpstan
-phpstan: ## executes php analizers
+phpstan: ## executes php analyzers
 		$(compose) run --rm code sh -lc './vendor/bin/phpstan analyse -l 6 -c phpstan.neon src tests'
 
 .PHONY: psalm
@@ -87,7 +84,7 @@ cs-check: ## executes coding standards in dry run mode
 
 .PHONY: layer
 layer: ## Check issues with layers
-		$(compose) run --rm code sh -lc 'bin/deptrac.phar analyze --formatter-graphviz=0'
+		$(compose) run --rm code sh -lc 'bin/deptrac.phar analyze'
 
 .PHONY: db
 db: ## recreate database
@@ -97,6 +94,11 @@ db: ## recreate database
 .PHONY: dmd
 dmd: ## Generate migrations diff file
 		$(compose) exec -T php sh -lc './bin/console d:m:diff'
+
+.PHONY: rector
+rector: ## rector
+		$(compose) exec -T php sh -lc './vendor/bin/rector process'
+
 .PHONY: schema-validate
 schema-validate: ## validate database schema
 		$(compose) exec -T php sh -lc './bin/console d:s:v'

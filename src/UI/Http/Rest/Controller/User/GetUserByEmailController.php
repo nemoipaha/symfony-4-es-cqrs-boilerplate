@@ -18,11 +18,6 @@ use Throwable;
 final class GetUserByEmailController extends QueryController
 {
     /**
-     * @Route(
-     *     "/user/{email}",
-     *     name="find_user",
-     *     methods={"GET"}
-     * )
      * @OA\Response(
      *     response=200,
      *     description="Returns the user of the given email",
@@ -50,14 +45,15 @@ final class GetUserByEmailController extends QueryController
      * @throws AssertionFailedException
      * @throws Throwable
      */
+    #[Route(path: '/user/{email}', name: 'find_user', methods: ['GET'])]
     public function __invoke(string $email): OpenApi
     {
         Assertion::email($email, "Email can\'t be empty or invalid");
 
-        $command = new FindByEmailQuery($email);
+        $query = new FindByEmailQuery($email);
 
         /** @var Item $user */
-        $user = $this->ask($command);
+        $user = $this->ask($query);
 
         return $this->json($user);
     }

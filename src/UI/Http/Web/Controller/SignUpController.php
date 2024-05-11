@@ -21,27 +21,20 @@ use Twig\Error\SyntaxError;
 class SignUpController extends AbstractRenderController
 {
     /**
-     * @Route(
-     *     "/sign-up",
-     *     name="sign-up",
-     *     methods={"GET"}
-     * )
      *
      * @throws LoaderError
      * @throws RuntimeError
      * @throws SyntaxError
      */
+    #[Route(path: '/sign-up', name: 'sign-up', methods: ['GET'])]
     public function get(): Response
     {
-        return $this->render('signup/index.html.twig');
+        $uuid = Uuid::uuid4()->toString();
+
+        return $this->render('signup/index.html.twig', ['uuid' => $uuid]);
     }
 
     /**
-     * @Route(
-     *     "/sign-up",
-     *     name="sign-up-post",
-     *     methods={"POST"}
-     * )
      *
      * @throws AssertionFailedException
      * @throws Throwable
@@ -49,23 +42,33 @@ class SignUpController extends AbstractRenderController
      * @throws RuntimeError
      * @throws SyntaxError
      */
+    #[Route(path: '/sign-up', name: 'sign-up-post', methods: ['POST'])]
     public function post(Request $request): Response
     {
-        $email =$request->request->get('email');
+        $errorHTTPStatusCode = null;
+        $afterErrorUuid = Uuid::uuid4()->toString();
+
+
+        $uuid = $request->request->get('uuid');
+        $email = $request->request->get('email');
         $password = $request->request->get('password');
-        $uuid = Uuid::uuid4()->toString();
 
         try {
+            Assertion::notNull($uuid, 'Missing uuid');
             Assertion::notNull($email, 'Email can\'t be null');
             Assertion::notNull($password, 'Password can\'t be null');
 
-            $this->handle(new SignUpCommand($uuid,(string) $email,(string) $password));
+            $this->handle(new SignUpCommand((string) $uuid, (string) $email, (string) $password));
 
             return $this->render('signup/user_created.html.twig', ['uuid' => $uuid, 'email' => $email]);
         } catch (EmailAlreadyExistException $exception) {
-            return $this->render('signup/index.html.twig', ['error' => $exception->getMessage()], Response::HTTP_CONFLICT);
+            $errorHTTPStatusCode = Response::HTTP_CONFLICT;
+
+            return $this->render('signup/index.html.twig', ['uuid' => $afterErrorUuid, 'error' => $exception->getMessage()], $errorHTTPStatusCode);
         } catch (InvalidArgumentException $exception) {
-            return $this->render('signup/index.html.twig', ['error' => $exception->getMessage()], Response::HTTP_BAD_REQUEST);
+            $errorHTTPStatusCode= Response::HTTP_BAD_REQUEST;
+
+            return $this->render('signup/index.html.twig', ['uuid' => $afterErrorUuid, 'error' => $exception->getMessage()], $errorHTTPStatusCode);
         }
     }
 }
